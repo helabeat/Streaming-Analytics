@@ -15,6 +15,7 @@ var dbConn = mysql.createConnection({
 	password: '',
 	database: 'music_app'
 });
+
 //connect to database
 dbConn.connect();
 //default route
@@ -28,6 +29,11 @@ app.post('/analytics', function (req, res){
 	let song_id = req.body.song_id;
 	var count=1;
 	let date = dateTime();
+	let currentdate = new Date();
+	let hours = currentdate.getHours();
+	let minutes = currentdate.getMinutes();
+	let time = hours+":"+minutes;
+	let day = currentdate.getDay();
 
 	var someVar;
 
@@ -54,6 +60,38 @@ app.post('/analytics', function (req, res){
 				dbConn.query("UPDATE analytics SET count = ?, last_date = ? where user_id = ? and song_id = ?",[count,date,user_id,song_id], function (error, results, fields){
 					if (error) throw error;
 					return res.send({ error: false, data: results, message: 'updated successfully.'});
+				});
+			});
+		}
+	});
+
+	//console.log(time);
+	//console.log(day);
+
+	dbConn.query("INSERT INTO user_analytics SET ? ", {user_id:user_id, song_id:song_id, time:time, day:day }, function(error, results, fields){
+		if(error) throw error;
+		//return res.send({ error:false, data: results, message: 'inserted successfully'});
+	});
+
+	let song_count = 1;
+
+	let query1 = dbConn.query("SELECT count from songs where song_id = ?", song_id, function(error, results, fields){
+		if(error) throw error;
+
+		let len = results.lenght;
+		if(len==0){
+			dbConn.query("INSERT INTO songs SET ?", {song_id:song_id, count:song_count, last_date:date}, function(error, results, fields){
+				if(error) throw error;
+
+			});
+		}
+		else{
+			song_obj = JSON.parse(stringify(results));
+			song_obj.forEach(function(element){
+				song_count=element.count;
+				song_count=song_count+1;
+				dbConn.query("UPDATE songs SET count=?, last_date=? where song_id=?", [song_count, date, song_id], function(error, results, fields){
+					if(error) throw error;
 				});
 			});
 		}
