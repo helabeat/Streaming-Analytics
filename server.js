@@ -100,6 +100,7 @@ app.post('/analytics', function (req, res){
 
 	dbConn.query("INSERT INTO session_data SET ? ", { session_id:session_id, item_id:song_id, time:time }, function(error, results, fields){
 		if(error) throw error;
+		//return res.send({ error:false, data: results, message: 'inserted successfully'});
 	});
 
 });
