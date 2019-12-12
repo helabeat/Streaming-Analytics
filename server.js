@@ -27,6 +27,7 @@ app.post('/analytics', function (req, res){
 	let analytics = req.body;
 	let user_id = req.body.user_id;
 	let song_id = req.body.song_id;
+	let session_id = req.body.session_id;
 	var count=1;
 	let date = dateTime();
 	let currentdate = new Date();
@@ -96,6 +97,11 @@ app.post('/analytics', function (req, res){
 			});
 		}
 	});
+
+	dbConn.query("INSERT INTO session_data SET ? ", { session_id:session_id, item_id:song_id, time:time }, function(error, results, fields){
+		if(error) throw error;
+	});
+
 });
 app.listen(3000, function(){
 	console.log('Node app is running on port 3000');
